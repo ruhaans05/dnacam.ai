@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>dnacamai</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>🌍 dnacamai</h1>
+  <p>Upload a photo or take one with your webcam, and we'll guess where in the world your features come from.</p>
+
+  <input type="file" id="upload" accept="image/*" />
+  <button id="captureBtn">📸 Use Webcam</button>
+  <video id="video" autoplay playsinline></video>
+  <canvas id="canvas" style="display:none;"></canvas>
+  <br/>
+  <button id="analyzeBtn">🔎 Analyze</button>
+  <p id="status"></p>
+  <div id="resultBox"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
