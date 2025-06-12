@@ -1,17 +1,20 @@
 from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
 import openai
 import base64
+import os
 
-# Set your OpenAI API key
-openai.api_key = "sk-..."
+# Load .env variables
+load_dotenv()
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 app = FastAPI()
 
-# Allow frontend connection (adjust origin as needed)
+# Allow frontend connection (adjust for production)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Change to your frontend domain if needed
+    allow_origins=["*"],  # For dev only — restrict in prod
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -19,12 +22,10 @@ app.add_middleware(
 
 @app.post("/analyze")
 async def analyze_face(image: UploadFile = File(...)):
-    # Read image file and convert to base64
     contents = await image.read()
     base64_image = base64.b64encode(contents).decode("utf-8")
     image_data = f"data:image/jpeg;base64,{base64_image}"
 
-    # GPT-4 Vision prompt
     messages = [
         {
             "role": "user",
@@ -46,7 +47,6 @@ async def analyze_face(image: UploadFile = File(...)):
         }
     ]
 
-    # Call OpenAI Vision API
     try:
         response = openai.ChatCompletion.create(
             model="gpt-4-vision-preview",
