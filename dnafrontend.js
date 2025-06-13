@@ -10,23 +10,34 @@ let currentImageBlob = null;
 
 // Webcam capture
 captureBtn.addEventListener('click', async () => {
-  video.style.display = 'block';
-  const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-  video.srcObject = stream;
+  try {
+    video.style.display = 'block';
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    video.srcObject = stream;
 
-  setTimeout(() => {
-    const context = canvas.getContext('2d');
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    context.drawImage(video, 0, 0);
-    video.srcObject.getTracks().forEach(track => track.stop());
-    video.style.display = 'none';
+    statusText.textContent = "📸 Capturing in 3 seconds...";
 
-    canvas.toBlob(blob => {
-      currentImageBlob = blob;
-      statusText.textContent = "📷 Captured from webcam.";
-    }, 'image/jpeg');
-  }, 3000); // Capture after 3 sec
+    setTimeout(() => {
+      const context = canvas.getContext('2d');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      context.drawImage(video, 0, 0);
+      stream.getTracks().forEach(track => track.stop());
+      video.style.display = 'none';
+
+      canvas.toBlob(blob => {
+        if (!blob) {
+          statusText.textContent = "❌ Failed to capture image.";
+        } else {
+          currentImageBlob = blob;
+          statusText.textContent = "✅ Image captured from webcam.";
+        }
+      }, 'image/jpeg');
+    }, 3000);
+  } catch (err) {
+    console.error("Webcam error:", err);
+    statusText.textContent = "❌ Webcam access failed. Please allow camera permission.";
+  }
 });
 
 // Image upload
@@ -35,6 +46,8 @@ uploadInput.addEventListener('change', () => {
   if (file) {
     currentImageBlob = file;
     statusText.textContent = "✅ Image uploaded.";
+  } else {
+    statusText.textContent = "❌ Failed to load image.";
   }
 });
 
@@ -50,10 +63,14 @@ analyzeBtn.addEventListener('click', async () => {
   formData.append("image", currentImageBlob);
 
   try {
-    const response = await fetch("https://dnacamai-backend.onrender.com/analyze", {
+    const response = await fetch("/analyze", {
       method: "POST",
       body: formData
     });
+
+    if (!response.ok) {
+      throw new Error(`Server returned ${response.status}`);
+    }
 
     const data = await response.json();
 
@@ -62,10 +79,11 @@ analyzeBtn.addEventListener('click', async () => {
       statusText.textContent = "✅ Done!";
     } else {
       resultBox.textContent = "❌ Error: " + data.error;
-      statusText.textContent = "⚠️ Failed.";
+      statusText.textContent = "⚠️ OpenAI failed to respond.";
     }
   } catch (err) {
-    resultBox.textContent = "❌ Error connecting to server.";
-    statusText.textContent = "⚠️ Failed.";
+    console.error("Analyze error:", err);
+    resultBox.textContent = "❌ Something went wrong. Check the console.";
+    statusText.textContent = `❌ Failed to connect to backend. (${err.message})`;
   }
 });
