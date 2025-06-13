@@ -9,12 +9,11 @@ const statusText = document.getElementById('status');
 const resultBox = document.getElementById('resultBox');
 
 let currentImageBlob = null;
-let stream = null;
 
 // Webcam capture
 captureBtn.addEventListener('click', async () => {
   try {
-    stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
     video.srcObject = stream;
     video.style.display = 'block';
     statusText.textContent = "📸 Capturing in 3 seconds...";
@@ -53,7 +52,7 @@ uploadInput.addEventListener('change', () => {
   }
 });
 
-// Analyze with backend
+// Analyze
 analyzeBtn.addEventListener('click', async () => {
   if (!currentImageBlob) {
     statusText.textContent = "⚠️ Upload or capture an image first.";
@@ -84,8 +83,8 @@ analyzeBtn.addEventListener('click', async () => {
       statusText.textContent = "⚠️ Failed.";
     }
   } catch (err) {
+    console.error("Analyze error:", err);
     resultBox.textContent = "❌ Something went wrong.";
     statusText.textContent = `❌ Failed: ${err.message}`;
-    console.error("Analyze error:", err);
   }
 });
