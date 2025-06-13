@@ -50,7 +50,7 @@ analyzeBtn.addEventListener('click', async () => {
   formData.append("image", currentImageBlob);
 
   try {
-    const response = await fetch("http://localhost:8000/analyze", {
+    const response = await fetch("https://dnacamai-backend.onrender.com/analyze", {
       method: "POST",
       body: formData
     });
