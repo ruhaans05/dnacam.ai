@@ -1,24 +1,28 @@
 from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 import openai
 import base64
 import os
 
-# Load .env variables
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 app = FastAPI()
 
-# Allow frontend connection (adjust for production)
+# CORS setup
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # For dev only — restrict in prod
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Serve static files from current directory
+app.mount("/", StaticFiles(directory=".", html=True), name="static")
 
 @app.post("/analyze")
 async def analyze_face(image: UploadFile = File(...)):
