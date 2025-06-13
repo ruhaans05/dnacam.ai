@@ -1,5 +1,4 @@
-console.log("✅ JS is running");
-alert("✅ JavaScript loaded");
+console.log("✅ JavaScript loaded");
 
 const uploadInput = document.getElementById('upload');
 const captureBtn = document.getElementById('captureBtn');
@@ -15,12 +14,7 @@ let stream = null;
 // Webcam capture
 captureBtn.addEventListener('click', async () => {
   try {
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      alert("Webcam not supported in this browser.");
-      return;
-    }
-
-    stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
     video.srcObject = stream;
     video.style.display = 'block';
     statusText.textContent = "📸 Capturing in 3 seconds...";
@@ -30,13 +24,12 @@ captureBtn.addEventListener('click', async () => {
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       context.drawImage(video, 0, 0);
-
       stream.getTracks().forEach(track => track.stop());
       video.style.display = 'none';
 
       canvas.toBlob(blob => {
         if (!blob) {
-          statusText.textContent = "❌ Could not capture image.";
+          statusText.textContent = "❌ Failed to capture image.";
         } else {
           currentImageBlob = blob;
           statusText.textContent = "✅ Captured from webcam.";
@@ -44,8 +37,7 @@ captureBtn.addEventListener('click', async () => {
       }, 'image/jpeg');
     }, 3000);
   } catch (err) {
-    console.error("Webcam error:", err);
-    alert("❌ Webcam access failed. Please allow permission.");
+    alert("❌ Webcam access failed. Check permissions.");
     statusText.textContent = "❌ Webcam error.";
   }
 });
@@ -61,7 +53,7 @@ uploadInput.addEventListener('change', () => {
   }
 });
 
-// Analyze with backend (use relative path!)
+// Analyze with backend
 analyzeBtn.addEventListener('click', async () => {
   if (!currentImageBlob) {
     statusText.textContent = "⚠️ Upload or capture an image first.";
@@ -74,7 +66,7 @@ analyzeBtn.addEventListener('click', async () => {
 
   try {
     const response = await fetch("/analyze", {
-      method: "POST",
+      method: "POST",         // ✅ MAKE SURE THIS IS POST
       body: formData
     });
 
@@ -89,11 +81,11 @@ analyzeBtn.addEventListener('click', async () => {
       statusText.textContent = "✅ Done!";
     } else {
       resultBox.textContent = "❌ OpenAI error: " + data.error;
-      statusText.textContent = "⚠️ OpenAI failed.";
+      statusText.textContent = "⚠️ Failed.";
     }
   } catch (err) {
-    console.error("Analyze error:", err);
     resultBox.textContent = "❌ Something went wrong.";
     statusText.textContent = `❌ Failed: ${err.message}`;
+    console.error("Analyze error:", err);
   }
 });
