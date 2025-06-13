@@ -1,6 +1,5 @@
 from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 import openai
@@ -12,7 +11,6 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 
 app = FastAPI()
 
-# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -21,15 +19,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Serve static files from the root directory
+# ✅ Serve HTML and JS from root (don't add custom GET /)
 app.mount("/", StaticFiles(directory=".", html=True), name="static")
 
-# Route to serve index.html at root
-@app.get("/")
-def read_root():
-    return FileResponse("index.html")
-
-# Route to handle image analysis
 @app.post("/analyze")
 async def analyze_face(image: UploadFile = File(...)):
     contents = await image.read()
