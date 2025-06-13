@@ -60,7 +60,7 @@ uploadInput.addEventListener('change', () => {
   }
 });
 
-// Analyze with backend
+// Analyze with backend (use relative path!)
 analyzeBtn.addEventListener('click', async () => {
   if (!currentImageBlob) {
     statusText.textContent = "⚠️ Upload or capture an image first.";
