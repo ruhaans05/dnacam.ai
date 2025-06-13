@@ -11,7 +11,7 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 
 app = FastAPI()
 
-# CORS setup
+# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -20,10 +20,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Serve static files
-app.mount("/", StaticFiles(directory=".", html=True), name="static")
+# ✅ Mount static files under /static to avoid conflict
+app.mount("/static", StaticFiles(directory="static", html=True), name="static")
 
-# ✅ This MUST be exactly like this
 @app.post("/analyze")
 async def analyze_face(image: UploadFile = File(...)):
     contents = await image.read()
