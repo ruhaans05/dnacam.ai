@@ -5,6 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>dnacamai</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:,">
+  <style>
+    video {
+      width: 320px;
+      height: auto;
+      border-radius: 10px;
+      margin-top: 1em;
+      display: none;
+    }
+  </style>
 </head>
 <body>
   <h1>🌍 dnacam.ai</h1>
@@ -18,6 +28,10 @@
   <button id="analyzeBtn">🔎 Analyze</button>
   <p id="status"></p>
   <div id="resultBox"></div>
+
+  <noscript>
+    <p style="color:red;">This app requires JavaScript to work. Please enable it.</p>
+  </noscript>
 
   <script src="/dnafrontend.js"></script>
 </body>
