@@ -1,4 +1,5 @@
-console.log("✅ JavaScript loaded");
+console.log("✅ JS is running");
+alert("✅ JavaScript loaded");
 
 const uploadInput = document.getElementById('upload');
 const captureBtn = document.getElementById('captureBtn');
