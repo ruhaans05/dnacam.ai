@@ -1,3 +1,5 @@
+console.log("✅ JavaScript loaded");
+
 const uploadInput = document.getElementById('upload');
 const captureBtn = document.getElementById('captureBtn');
 const analyzeBtn = document.getElementById('analyzeBtn');
@@ -7,14 +9,19 @@ const statusText = document.getElementById('status');
 const resultBox = document.getElementById('resultBox');
 
 let currentImageBlob = null;
+let stream = null;
 
 // Webcam capture
 captureBtn.addEventListener('click', async () => {
   try {
-    video.style.display = 'block';
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    video.srcObject = stream;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      alert("Webcam not supported in this browser.");
+      return;
+    }
 
+    stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    video.srcObject = stream;
+    video.style.display = 'block';
     statusText.textContent = "📸 Capturing in 3 seconds...";
 
     setTimeout(() => {
@@ -22,21 +29,23 @@ captureBtn.addEventListener('click', async () => {
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       context.drawImage(video, 0, 0);
+
       stream.getTracks().forEach(track => track.stop());
       video.style.display = 'none';
 
       canvas.toBlob(blob => {
         if (!blob) {
-          statusText.textContent = "❌ Failed to capture image.";
+          statusText.textContent = "❌ Could not capture image.";
         } else {
           currentImageBlob = blob;
-          statusText.textContent = "✅ Image captured from webcam.";
+          statusText.textContent = "✅ Captured from webcam.";
         }
       }, 'image/jpeg');
     }, 3000);
   } catch (err) {
     console.error("Webcam error:", err);
-    statusText.textContent = "❌ Webcam access failed. Please allow camera permission.";
+    alert("❌ Webcam access failed. Please allow permission.");
+    statusText.textContent = "❌ Webcam error.";
   }
 });
 
@@ -47,18 +56,18 @@ uploadInput.addEventListener('change', () => {
     currentImageBlob = file;
     statusText.textContent = "✅ Image uploaded.";
   } else {
-    statusText.textContent = "❌ Failed to load image.";
+    statusText.textContent = "❌ No image selected.";
   }
 });
 
 // Analyze with backend
 analyzeBtn.addEventListener('click', async () => {
   if (!currentImageBlob) {
-    statusText.textContent = "⚠️ Please upload or capture an image first.";
+    statusText.textContent = "⚠️ Upload or capture an image first.";
     return;
   }
 
-  statusText.textContent = "⏳ Analyzing...";
+  statusText.textContent = "⏳ Sending to OpenAI...";
   const formData = new FormData();
   formData.append("image", currentImageBlob);
 
@@ -69,7 +78,7 @@ analyzeBtn.addEventListener('click', async () => {
     });
 
     if (!response.ok) {
-      throw new Error(`Server returned ${response.status}`);
+      throw new Error(`Server responded with ${response.status}`);
     }
 
     const data = await response.json();
@@ -78,12 +87,12 @@ analyzeBtn.addEventListener('click', async () => {
       resultBox.textContent = data.result;
       statusText.textContent = "✅ Done!";
     } else {
-      resultBox.textContent = "❌ Error: " + data.error;
-      statusText.textContent = "⚠️ OpenAI failed to respond.";
+      resultBox.textContent = "❌ OpenAI error: " + data.error;
+      statusText.textContent = "⚠️ OpenAI failed.";
     }
   } catch (err) {
     console.error("Analyze error:", err);
-    resultBox.textContent = "❌ Something went wrong. Check the console.";
-    statusText.textContent = `❌ Failed to connect to backend. (${err.message})`;
+    resultBox.textContent = "❌ Something went wrong.";
+    statusText.textContent = `❌ Failed: ${err.message}`;
   }
 });
