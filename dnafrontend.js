@@ -14,7 +14,7 @@ let stream = null;
 // Webcam capture
 captureBtn.addEventListener('click', async () => {
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    stream = await navigator.mediaDevices.getUserMedia({ video: true });
     video.srcObject = stream;
     video.style.display = 'block';
     statusText.textContent = "📸 Capturing in 3 seconds...";
@@ -66,7 +66,7 @@ analyzeBtn.addEventListener('click', async () => {
 
   try {
     const response = await fetch("/analyze", {
-      method: "POST",         // ✅ MAKE SURE THIS IS POST
+      method: "POST",
       body: formData
     });
 
