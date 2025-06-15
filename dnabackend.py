@@ -32,14 +32,15 @@ async def analyze_face(image: UploadFile = File(...)):
             "role": "user",
             "content": [
                 {
-                    "type": "text",
-                    "text": (
-                        "Analyze this person's facial features, complexion, and structure. "
-                        "Then, based on global human variation and visible phenotype, guess which region or regions of the world "
-                        "they most likely resemble ancestrally. Focus on phenotypic similarity, not modern nationality. "
-                        "Be specific (country or subregion level) and explain your reasoning clearly."
-                    )
-                },
+    "type": "text",
+    "text": (
+        "Based on every visible detail in this image — including but not limited to skin tone, hair type and color, face structure, eye shape and color, nose and lip shape, and other phenotypic features — perform a detailed, unbiased analysis. "
+        "Your goal is to determine the most likely subregional geographic origin of this person (for example, a specific district, province, or small ethnic group) based on their physical features. "
+        "Avoid vague generalizations, avoid modern political boundaries, and rely only on known human phenotypic diversity data. "
+        "This is for a comprehensive ancestry report, so go into depth. Be as precise, objective, and specific as possible in your reasoning."
+    )
+}
+,
                 {
                     "type": "image_url",
                     "image_url": {
