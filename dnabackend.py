@@ -1,6 +1,7 @@
 from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from dotenv import load_dotenv
 import openai
 import base64
@@ -11,6 +12,7 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 
 app = FastAPI()
 
+# CORS for frontend requests
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -19,14 +21,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Serve index.html and static files from the root
+# Serve all frontend files from root
 app.mount("/", StaticFiles(directory=".", html=True), name="static")
+
+# Serve index.html explicitly on root route
+@app.get("/")
+def serve_home():
+    return FileResponse("index.html")
+
 
 @app.post("/analyze")
 async def analyze_face(image: UploadFile = File(...)):
     contents = await image.read()
     base64_image = base64.b64encode(contents).decode("utf-8")
-    image_data = f"data:image/jpeg;base64,{base64_image}"
 
     messages = [
         {
@@ -44,7 +51,7 @@ async def analyze_face(image: UploadFile = File(...)):
                 {
                     "type": "image_url",
                     "image_url": {
-                        "url": image_data
+                        "url": f"data:image/jpeg;base64,{base64_image}"
                     }
                 }
             ],
@@ -53,7 +60,7 @@ async def analyze_face(image: UploadFile = File(...)):
 
     try:
         response = openai.ChatCompletion.create(
-            model="gpt-4o",
+            model="gpt-4o",  # or your authorized model
             messages=messages,
             max_tokens=500
         )
