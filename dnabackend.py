@@ -19,7 +19,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ✅ Serve HTML and JS from root (don't add custom GET /)
+# Serve frontend
 app.mount("/", StaticFiles(directory=".", html=True), name="static")
 
 @app.post("/analyze")
@@ -43,7 +43,9 @@ async def analyze_face(image: UploadFile = File(...)):
                 },
                 {
                     "type": "image_url",
-                    "image_url": image_data
+                    "image_url": {
+                        "url": image_data
+                    }
                 }
             ],
         }
@@ -51,7 +53,7 @@ async def analyze_face(image: UploadFile = File(...)):
 
     try:
         response = openai.ChatCompletion.create(
-            model="gpt-4-vision-preview",
+            model="gpt-4o",
             messages=messages,
             max_tokens=500
         )
