@@ -19,7 +19,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Serve frontend
+# Serve index.html and static files from the root
 app.mount("/", StaticFiles(directory=".", html=True), name="static")
 
 @app.post("/analyze")
