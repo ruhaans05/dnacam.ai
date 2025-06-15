@@ -1,7 +1,6 @@
 from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
 from dotenv import load_dotenv
 import openai
 import base64
@@ -12,7 +11,6 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 
 app = FastAPI()
 
-# CORS for frontend requests
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -21,19 +19,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Serve all frontend files from root
-app.mount("/", StaticFiles(directory=".", html=True), name="static")
-
-# Serve index.html explicitly on root route
-@app.get("/")
-def serve_home():
-    return FileResponse("index.html")
-
-
 @app.post("/analyze")
 async def analyze_face(image: UploadFile = File(...)):
     contents = await image.read()
     base64_image = base64.b64encode(contents).decode("utf-8")
+    image_data = f"data:image/jpeg;base64,{base64_image}"
 
     messages = [
         {
@@ -51,7 +41,7 @@ async def analyze_face(image: UploadFile = File(...)):
                 {
                     "type": "image_url",
                     "image_url": {
-                        "url": f"data:image/jpeg;base64,{base64_image}"
+                        "url": image_data
                     }
                 }
             ],
@@ -60,7 +50,7 @@ async def analyze_face(image: UploadFile = File(...)):
 
     try:
         response = openai.ChatCompletion.create(
-            model="gpt-4o",  # or your authorized model
+            model="gpt-4o",
             messages=messages,
             max_tokens=500
         )
@@ -68,3 +58,6 @@ async def analyze_face(image: UploadFile = File(...)):
         return {"result": result}
     except Exception as e:
         return {"error": str(e)}
+
+# ✅ MOUNT STATIC FILES LAST
+app.mount("/", StaticFiles(directory=".", html=True), name="static")
