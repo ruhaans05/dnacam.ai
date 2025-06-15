@@ -1,13 +1,15 @@
 from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from dotenv import load_dotenv
 import openai
 import base64
 import os
 
 load_dotenv()
-openai.api_key = os.getenv("OPENAI_API_KEY")
+
+client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 app = FastAPI()
 
@@ -49,15 +51,15 @@ async def analyze_face(image: UploadFile = File(...)):
     ]
 
     try:
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-4o",
             messages=messages,
             max_tokens=500
         )
-        result = response.choices[0].message["content"]
+        result = response.choices[0].message.content
         return {"result": result}
     except Exception as e:
         return {"error": str(e)}
 
-# ✅ MOUNT STATIC FILES LAST
+# Mount static files AFTER defining routes
 app.mount("/", StaticFiles(directory=".", html=True), name="static")
