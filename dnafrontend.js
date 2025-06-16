@@ -16,7 +16,7 @@ captureBtn.addEventListener('click', async () => {
     const stream = await navigator.mediaDevices.getUserMedia({ video: true });
     video.srcObject = stream;
     video.style.display = 'block';
-    statusText.textContent = "📸 Capturing in 3 seconds...";
+    statusText.textContent = "📸 Capturing in 3...2...1 seconds...";
 
     setTimeout(() => {
       const context = canvas.getContext('2d');
@@ -59,7 +59,7 @@ analyzeBtn.addEventListener('click', async () => {
     return;
   }
 
-  statusText.textContent = "⏳ Analyzing Phenotypes...";
+  statusText.textContent = "⏳ Analyzing Phenotypes... (just click analyze again if you get an analysis error)";
   const formData = new FormData();
   formData.append("image", currentImageBlob);
 
