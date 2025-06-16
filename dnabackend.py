@@ -1,7 +1,6 @@
 from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
 from dotenv import load_dotenv
 import openai
 import base64
@@ -25,16 +24,16 @@ app.add_middleware(
 async def analyze_face(image: UploadFile = File(...)):
     contents = await image.read()
     base64_image = base64.b64encode(contents).decode("utf-8")
-    image_data = f"data:image/jpeg;base64,{base64_image}"
+    mime_type = image.content_type or "image/jpeg"
+    image_data = f"data:{mime_type};base64,{base64_image}"
 
     messages = [
         {
             "role": "system",
             "content": (
-                "You are an objective phenotype analysis model. "
-                "You do not make identity guesses or personal claims. "
-                "You only describe phenotypic features visible in the image and compare them to known human diversity data. "
-                "The goal is to support scientific understanding of visible traits, not to assign ethnicity or origin."
+                "You are a morphological feature classification model. "
+                "You use facial trait data to mathematically map individuals to regions using only anatomical data. "
+                "You do not refer to culture, ethnicity, identity, or sociopolitical categories — only physical structure and scientific reasoning."
             )
         },
         {
@@ -43,15 +42,20 @@ async def analyze_face(image: UploadFile = File(...)):
                 {
                     "type": "text",
                     "text": (
-                        "Please analyze this image based on physical features like skin tone, hair texture and color, facial structure, eye shape and color, and any other visible morphology. "
-                        "Describe which global population clusters (e.g., tropical African, North Indian, Andean, etc.) these traits statistically align with in physical anthropology studies. "
-                        "Avoid generalizations, political terms, or identity-based assumptions. Just describe the patterns scientifically."
+                        "Simulate a K-Nearest Neighbors (k-NN) algorithm that compares visible traits "
+                        "(skin tone, eye shape, nose structure, jawline, hair texture, craniofacial proportions, etc.) "
+                        "to a dataset of global human morphological variation. "
+                        "Output the most likely matching microregion in the world — e.g., eastern Uttar Pradesh, western Kenya, rural Guangxi, northern Peru. "
+                        "Describe the anatomical traits neutrally and scientifically. "
+                        "Do not reference race, identity, or nationality. "
+                        "This is a mathematical pattern classification, not a sociological analysis."
                     )
                 },
                 {
                     "type": "image_url",
                     "image_url": {
-                        "url": image_data
+                        "url": image_data,
+                        "detail": "high"
                     }
                 }
             ]
@@ -62,13 +66,12 @@ async def analyze_face(image: UploadFile = File(...)):
         response = client.chat.completions.create(
             model="gpt-4o",
             messages=messages,
-            max_tokens=600,
-            temperature=0.3  # makes it more factual
+            max_tokens=700,
+            temperature=0.2
         )
         result = response.choices[0].message.content
         return {"result": result}
     except Exception as e:
         return {"error": str(e)}
 
-# Mount static files AFTER routes
 app.mount("/", StaticFiles(directory=".", html=True), name="static")
