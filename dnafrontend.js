@@ -59,7 +59,7 @@ analyzeBtn.addEventListener('click', async () => {
     return;
   }
 
-  statusText.textContent = "⏳ Analyzing Phenotypes... (just click analyze again if you get an analysis error)";
+  statusText.textContent = "⏳ Analyzing Phenotypes... (just re-upload/retake picture if you get an analysis error)";
   const formData = new FormData();
   formData.append("image", currentImageBlob);
 
