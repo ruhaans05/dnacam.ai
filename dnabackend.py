@@ -28,39 +28,37 @@ async def analyze_face(image: UploadFile = File(...)):
     image_data = f"data:{mime_type};base64,{base64_image}"
 
     messages = [
-        {
-            "role": "system",
-            "content": (
-                "You are a morphological feature classification model. "
-                "You use facial trait data to mathematically map individuals to regions using only anatomical data. "
-                "You do not refer to culture, ethnicity, identity, or sociopolitical categories — only physical structure and scientific reasoning."
-            )
-        },
-        {
-            "role": "user",
-            "content": [
-                {
-                    "type": "text",
-                    "text": (
-                        "Simulate a K-Nearest Neighbors (k-NN) algorithm that compares visible traits "
-                        "(skin tone, eye shape, nose structure, jawline, hair texture, craniofacial proportions, etc.) "
-                        "to a dataset of global human morphological variation. "
-                        "Output the most likely matching microregion in the world — e.g., eastern Uttar Pradesh, western Kenya, rural Guangxi, northern Peru. "
-                        "Describe the anatomical traits neutrally and scientifically. "
-                        "Do not reference race, identity, or nationality. "
-                        "This is a mathematical pattern classification, not a sociological analysis."
-                    )
-                },
-                {
-                    "type": "image_url",
-                    "image_url": {
-                        "url": image_data,
-                        "detail": "high"
-                    }
+    {
+        "role": "system",
+        "content": (
+            "You are a morphological feature analysis model. You only analyze anatomical traits and describe patterns "
+            "observed in the image using population-level morphological data. You avoid cultural, political, or identity-based assumptions."
+        )
+    },
+    {
+        "role": "user",
+        "content": [
+            {
+                "type": "text",
+                "text": (
+                    "Use a scientific and anatomical approach to describe the visible facial features in the image. "
+                    "Consider traits such as craniofacial proportions, skin pigmentation, eye morphology, and hair texture. "
+                    "Describe how these traits may be similar to those observed in specific regional morphological clusters "
+                    "based on population-level trait datasets, without making assumptions about identity, race, or origin. "
+                    "Do not use nationality or cultural terms. Frame your reasoning as pattern-based classification, not sociological interpretation."
+                )
+            },
+            {
+                "type": "image_url",
+                "image_url": {
+                    "url": image_data,
+                    "detail": "high"
                 }
-            ]
-        }
-    ]
+            }
+        ]
+    }
+]
+
 
     try:
         response = client.chat.completions.create(
