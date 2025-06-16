@@ -59,7 +59,7 @@ analyzeBtn.addEventListener('click', async () => {
     return;
   }
 
-  statusText.textContent = "⏳ Sending to OpenAI...";
+  statusText.textContent = "⏳ Analyzing Phenotypes...";
   const formData = new FormData();
   formData.append("image", currentImageBlob);
 
