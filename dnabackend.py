@@ -29,25 +29,32 @@ async def analyze_face(image: UploadFile = File(...)):
 
     messages = [
         {
+            "role": "system",
+            "content": (
+                "You are an objective phenotype analysis model. "
+                "You do not make identity guesses or personal claims. "
+                "You only describe phenotypic features visible in the image and compare them to known human diversity data. "
+                "The goal is to support scientific understanding of visible traits, not to assign ethnicity or origin."
+            )
+        },
+        {
             "role": "user",
             "content": [
                 {
-    "type": "text",
-    "text": (
-        "Based on every visible detail in this image — including but not limited to skin tone, hair type and color, face structure, eye shape and color, nose and lip shape, and other phenotypic features — perform a detailed, unbiased analysis. "
-        "Your goal is to determine the most likely subregional geographic origin of this person (for example, a specific district, province, or small ethnic group) based on their physical features. "
-        "Avoid vague generalizations, avoid modern political boundaries, and rely only on known human phenotypic diversity data. "
-        "This is for a comprehensive ancestry report, so go into depth. Be as precise, objective, and specific as possible in your reasoning."
-    )
-}
-,
+                    "type": "text",
+                    "text": (
+                        "Please analyze this image based on physical features like skin tone, hair texture and color, facial structure, eye shape and color, and any other visible morphology. "
+                        "Describe which global population clusters (e.g., tropical African, North Indian, Andean, etc.) these traits statistically align with in physical anthropology studies. "
+                        "Avoid generalizations, political terms, or identity-based assumptions. Just describe the patterns scientifically."
+                    )
+                },
                 {
                     "type": "image_url",
                     "image_url": {
                         "url": image_data
                     }
                 }
-            ],
+            ]
         }
     ]
 
@@ -55,12 +62,13 @@ async def analyze_face(image: UploadFile = File(...)):
         response = client.chat.completions.create(
             model="gpt-4o",
             messages=messages,
-            max_tokens=500
+            max_tokens=600,
+            temperature=0.3  # makes it more factual
         )
         result = response.choices[0].message.content
         return {"result": result}
     except Exception as e:
         return {"error": str(e)}
 
-# Mount static files AFTER defining routes
+# Mount static files AFTER routes
 app.mount("/", StaticFiles(directory=".", html=True), name="static")
