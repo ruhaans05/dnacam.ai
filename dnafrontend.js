@@ -53,42 +53,38 @@ uploadInput.addEventListener('change', () => {
 });
 
 // Analyze
-analyzeBtn.addEventListener('click', () => {
+analyzeBtn.addEventListener('click', async () => {
   if (!currentImageBlob) {
     statusText.textContent = "⚠️ Upload or capture an image first.";
     return;
   }
 
   statusText.textContent = "⏳ Analyzing Phenotypes... (just click analyze again if you get an analysis error)";
+  const formData = new FormData();
+  formData.append("image", currentImageBlob);
 
-  // ✅ Delay helps avoid analyzing an unstable or corrupted blob
-  setTimeout(async () => {
-    const formData = new FormData();
-    formData.append("image", currentImageBlob);
+  try {
+    const response = await fetch("/analyze", {
+      method: "POST",
+      body: formData
+    });
 
-    try {
-      const response = await fetch("/analyze", {
-        method: "POST",
-        body: formData
-      });
-
-      if (!response.ok) {
-        throw new Error(`Server responded with ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      if (data.result) {
-        resultBox.textContent = data.result;
-        statusText.textContent = "✅ Done!";
-      } else {
-        resultBox.textContent = "❌ OpenAI error: " + data.error;
-        statusText.textContent = "⚠️ Failed.";
-      }
-    } catch (err) {
-      console.error("Analyze error:", err);
-      resultBox.textContent = "❌ Something went wrong.";
-      statusText.textContent = `❌ Failed: ${err.message}`;
+    if (!response.ok) {
+      throw new Error(`Server responded with ${response.status}`);
     }
-  }, 600); // Delay gives time for the blob to stabilize
+
+    const data = await response.json();
+
+    if (data.result) {
+      resultBox.textContent = data.result;
+      statusText.textContent = "✅ Done!";
+    } else {
+      resultBox.textContent = "❌ OpenAI error: " + data.error;
+      statusText.textContent = "⚠️ Failed.";
+    }
+  } catch (err) {
+    console.error("Analyze error:", err);
+    resultBox.textContent = "❌ Something went wrong.";
+    statusText.textContent = `❌ Failed: ${err.message}`;
+  }
 });
