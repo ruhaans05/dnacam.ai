@@ -1,3 +1,5 @@
+
+
 from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -23,46 +25,43 @@ app.add_middleware(
 @app.post("/analyze")
 async def analyze_face(image: UploadFile = File(...)):
     contents = await image.read()
-
-    # ✅ Reject low-quality or corrupted images
-    if len(contents) < 20000:
-        return {"error": "Image too small or unclear. Please retake the photo."}
-
     base64_image = base64.b64encode(contents).decode("utf-8")
     mime_type = image.content_type or "image/jpeg"
     image_data = f"data:{mime_type};base64,{base64_image}"
 
     messages = [
-        {
-            "role": "system",
-            "content": (
-                "You are a morphological feature analysis model. You only analyze anatomical traits and describe patterns "
-                "observed in the image using population-level morphological data. You avoid cultural, political, or identity-based assumptions."
-            )
-        },
-        {
-            "role": "user",
-            "content": [
-                {
-                    "type": "text",
-                    "text": (
-                        "Use a scientific and anatomical approach to describe the visible facial features in the image. "
-                        "Consider traits such as craniofacial proportions, skin pigmentation, eye morphology, and hair texture. "
-                        "Describe how these traits may be similar to those observed in specific regional morphological clusters "
-                        "based on population-level trait datasets, without making assumptions about identity, race, or origin. "
-                        "Do not use nationality or cultural terms. Frame your reasoning as pattern-based classification, not sociological interpretation."
-                    )
-                },
-                {
-                    "type": "image_url",
-                    "image_url": {
-                        "url": image_data,
-                        "detail": "high"
-                    }
+    {
+        "role": "system",
+        "content": (
+            "You are a morphological feature analysis model. You only analyze anatomical traits and describe patterns "
+            "observed in the image using population-level morphological data. You avoid cultural, political, or identity-based assumptions."
+        )
+    },
+    {
+        "role": "user",
+        "content": [
+            {
+                "type": "text",
+                "text": (
+                    "Use a scientific and anatomical approach to describe the visible facial features in the image. "
+                    "Consider traits such as craniofacial proportions, skin pigmentation, eye morphology, and hair texture. "
+                    "Describe how these traits may be similar to those observed in specific regional morphological clusters "
+                    "based on population-level trait datasets, without making assumptions about identity, race, or origin. "
+                    "Do not use nationality or cultural terms. Frame your reasoning as pattern-based classification, not sociological interpretation."
+                )
+            },
+            {
+                "type": "image_url",
+                "image_url": {
+                    "url": image_data,
+                    "detail": "high"
                 }
-            ]
-        }
-    ]
+            }
+        ]
+    }
+]
+
+
 
     try:
         response = client.chat.completions.create(
