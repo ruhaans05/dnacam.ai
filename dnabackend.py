@@ -36,31 +36,29 @@ async def analyze_face(image: UploadFile = File(...)):
         )
     },
     {
-    "role": "user",
-    "content": [
-        {
-            "type": "text",
-            "text": (
-                "Analyze the individual's visible anatomical traits with dense, scientific descriptors. Include: "
-                "skin tone, undertone, craniofacial shape, forehead slope, cheekbone position, nasal width/bridge, "
-                "lip thickness, jaw shape, chin prominence, eye shape and distance, eyelid type, brow ridge, and hair color/texture. "
-                "Frame the analysis like a compressed trait vector used in morphological clustering (e.g., PCA or k-NN). "
-                "At the end, output the most statistically similar subregional cluster (e.g., western Kenya, eastern Uttar Pradesh, "
-                "rural Guangxi, northern Andes, coastal Maghreb, etc.) using only population-level phenotypic similarity — "
-                "not culture, race, or identity."
-            )
-        },
-        {
-            "type": "image_url",
-            "image_url": {
-                "url": image_data,
-                "detail": "high"
+        "role": "user",
+        "content": [
+            {
+                "type": "text",
+                "text": (
+                    "Use a scientific and anatomical approach to describe the visible facial features in the image. "
+                    "Consider traits such as craniofacial proportions, skin pigmentation, eye morphology, and hair texture. "
+                    "Describe how these traits may be similar to those observed in specific regional morphological clusters "
+                    "based on population-level trait datasets, without making assumptions about identity, race, or origin. "
+                    "Do not use nationality or cultural terms. Frame your reasoning as pattern-based classification, not sociological interpretation."
+                )
+            },
+            {
+                "type": "image_url",
+                "image_url": {
+                    "url": image_data,
+                    "detail": "high"
+                }
             }
-        }
-    ]
-}
-
+        ]
+    }
 ]
+
 
 
     try:
