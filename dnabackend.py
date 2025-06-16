@@ -68,7 +68,7 @@ async def analyze_face(image: UploadFile = File(...)):
             model="gpt-4o",
             messages=messages,
             max_tokens=700,
-            temperature=0.2
+            temperature=0.7
         )
         result = response.choices[0].message.content
         return {"result": result}
