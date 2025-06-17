@@ -4,10 +4,8 @@
   <title>Regional Trait Map</title>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
-
   <style>
     #map {
       height: 100vh;
@@ -53,42 +51,95 @@
       "Iran Plateau": [32, 53],
       "Central Asia": [41, 69],
       "Andes": [-10, -75],
-      "Himalayas": [28, 85]
+      "Himalayas": [28, 85],
+      "Scandinavia": [61, 10],
+      "West Africa": [9, -10],
+      "East Coast USA": [40, -74],
+      "West Coast USA": [37, -122],
+      "Southern USA": [32, -90],
+      "Northern Canada": [60, -95],
+      "Mexico": [23, -102],
+      "Caribbean": [18, -66],
+      "South Africa": [-30, 25],
+      "Maghreb": [32, 2],
+      "Turkey": [39, 35],
+      "Balkans": [44, 20],
+      "Australia": [-25, 133],
+      "New Zealand": [-41, 174],
+      "Siberia": [65, 105],
+      "Indonesia": [-5, 120],
+      "Japan": [36, 138],
+      "UK": [54, -2],
+      "France": [46, 2],
+      "Germany": [51, 10],
+      "Spain": [40, -4],
+      "Ukraine": [49, 31],
+      "Pakistan": [30, 70],
+      "Bangladesh": [24, 90],
+      "Myanmar": [21, 96],
+      "Thailand": [15, 101],
+      "Malaysia": [4, 102]
     };
 
-    // Reverse map: region => most associated trait
-    const regionToTrait = {
-      "Congo Basin": "broad nasal base",
-      "Eastern India": "broad nasal base",
-      "Philippines": "broad nasal base",
-      "South Asia": "wavy black hair",
-      "Southern Italy": "wavy black hair",
-      "Vietnam": "wavy black hair",
-      "Central India": "medium brown skin tone",
-      "Northern Brazil": "medium brown skin tone",
-      "Sri Lanka": "medium brown skin tone",
-      "Mongolia": "prominent cheekbones",
-      "Andean Highlands": "prominent cheekbones",
-      "Yunnan": "prominent cheekbones",
-      "Northern Europe": "deep-set eyes",
-      "Caucasus": "deep-set eyes",
-      "Northern China": "straight eyebrows",
-      "Korea": "straight eyebrows",
-      "Kazakhstan": "straight eyebrows",
-      "East Africa": "projecting jawline",
-      "Melanesia": "projecting jawline",
-      "Southeast Asia": "low nasal bridge",
-      "Tibet": "low nasal bridge",
-      "Borneo": "low nasal bridge",
-      "Northern India": "narrow nasal bridge",
-      "Arabian Peninsula": "narrow nasal bridge",
-      "Iran Plateau": "narrow nasal bridge",
-      "Central Asia": "high cheekbones",
-      "Andes": "high cheekbones",
-      "Himalayas": "high cheekbones"
+    const regionToTraits = {
+      "Congo Basin": ["broad nasal base", "deep melanin pigmentation"],
+      "Eastern India": ["broad nasal base", "medium brown skin", "thick wavy hair"],
+      "Philippines": ["broad nasal base", "flat nasal bridge", "almond eyes"],
+      "South Asia": ["wavy black hair", "olive skin", "prominent nose bridge"],
+      "Southern Italy": ["wavy black hair", "Mediterranean complexion"],
+      "Vietnam": ["wavy black hair", "flat nasal bridge"],
+      "Central India": ["medium brown skin tone", "rounded jawline"],
+      "Northern Brazil": ["medium brown skin tone", "Amazonian features"],
+      "Sri Lanka": ["medium brown skin tone", "small orbital opening"],
+      "Mongolia": ["prominent cheekbones", "epicanthic fold", "round facial shape"],
+      "Andean Highlands": ["prominent cheekbones", "bronzed skin", "narrow eyes"],
+      "Yunnan": ["prominent cheekbones", "intermediate skin tone"],
+      "Northern Europe": ["deep-set eyes", "high forehead", "light pigmentation"],
+      "Caucasus": ["deep-set eyes", "hooked nose"],
+      "Northern China": ["straight eyebrows", "flat face", "medium pigmentation"],
+      "Korea": ["straight eyebrows", "epicanthic fold", "rounded jaw"],
+      "Kazakhstan": ["straight eyebrows", "broad cheekbones"],
+      "East Africa": ["projecting jawline", "high cheekbones"],
+      "Melanesia": ["projecting jawline", "dark skin", "tight curls"],
+      "Southeast Asia": ["low nasal bridge", "almond eyes"],
+      "Tibet": ["low nasal bridge", "wider facial angle"],
+      "Borneo": ["low nasal bridge", "broad nose"],
+      "Northern India": ["narrow nasal bridge", "longer face"],
+      "Arabian Peninsula": ["narrow nasal bridge", "deep eyes"],
+      "Iran Plateau": ["narrow nasal bridge", "prominent chin"],
+      "Central Asia": ["high cheekbones", "almond eyes"],
+      "Andes": ["high cheekbones", "shorter nose", "bronzed skin"],
+      "Himalayas": ["high cheekbones", "broad forehead"],
+      "Scandinavia": ["light eyes", "tall stature", "narrow face"],
+      "West Africa": ["broad nose", "high melanin", "shorter forehead"],
+      "East Coast USA": ["diverse blend", "mixed features"],
+      "West Coast USA": ["diverse blend", "multiethnic appearance"],
+      "Southern USA": ["European-African mix", "wide facial width"],
+      "Northern Canada": ["Inuit cranial traits", "broad cheekbones", "cold-adapted noses"],
+      "Mexico": ["Mesoamerican features", "straight black hair"],
+      "Caribbean": ["African-Caribbean mix", "medium-wide nose"],
+      "South Africa": ["Khoisan features", "Bantu cranial shape"],
+      "Maghreb": ["Berber-Arab features", "medium skin tone"],
+      "Turkey": ["Anatolian skull", "mixed traits"],
+      "Balkans": ["Slavic-Dinaric nose", "robust jawline"],
+      "Australia": ["Anglo-Celtic features", "oval face"],
+      "New Zealand": ["Māori brow ridge", "strong jaw"],
+      "Siberia": ["broad cheekbones", "epicanthic fold", "short limbs"],
+      "Indonesia": ["short nose", "brown skin", "broad lips"],
+      "Japan": ["epicanthic fold", "straight hair", "oval jaw"],
+      "UK": ["Anglo-Saxon features", "pale skin", "thin lips"],
+      "France": ["Gallic traits", "oval face", "medium pigmentation"],
+      "Germany": ["Teutonic jaw", "deep eye sockets"],
+      "Spain": ["Mediterranean pigment", "narrow nasal base"],
+      "Ukraine": ["Slavic cranial vault", "broad forehead"],
+      "Pakistan": ["Indo-Iranian features", "olive skin tone"],
+      "Bangladesh": ["Bengali curve", "soft cheekbones"],
+      "Myanmar": ["Bamar structure", "medium-dark skin"],
+      "Thailand": ["Thai eye ridge", "smaller jaw"],
+      "Malaysia": ["Malay jaw curve", "medium nasal bridge"]
     };
 
-    const matchedRegions = Object.keys(regionToCoordinates); // Show all for now
+    const matchedRegions = Object.keys(regionToCoordinates);
 
     const map = L.map('map').setView([20, 0], 2);
 
@@ -99,16 +150,17 @@
 
     matchedRegions.forEach(region => {
       const coords = regionToCoordinates[region];
-      const trait = regionToTrait[region];
-      if (coords && trait) {
+      const traits = regionToTraits[region] || ["No trait info"];
+      const traitHTML = traits.map(t => `• ${t}`).join("<br>");
+      if (coords) {
         L.circle(coords, {
           color: 'red',
           fillColor: '#f03',
-          fillOpacity: 0.5,
-          radius: 500000
+          fillOpacity: 0.4,
+          radius: 400000
         })
         .addTo(map)
-        .bindPopup(`<b>${region}</b><br><i>Most common trait:</i><br>${trait}`);
+        .bindPopup(`<b>${region}</b><br><i>Common traits:</i><br>${traitHTML}`);
       }
     });
   </script>
