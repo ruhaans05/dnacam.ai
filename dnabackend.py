@@ -23,8 +23,28 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# JSON content for trait-to-region fallback
+TRAIT_REGION_DATA = {
+    "broad nasal base": ["Congo Basin", "Eastern India", "Philippines"],
+    "wavy black hair": ["South Asia", "Southern Italy", "Vietnam"],
+    "medium brown skin tone": ["Central India", "Northern Brazil", "Sri Lanka"],
+    "prominent cheekbones": ["Mongolia", "Andean Highlands", "Yunnan"],
+    "deep-set eyes": ["Northern Europe", "Caucasus"],
+    "straight eyebrows": ["Northern China", "Korea", "Kazakhstan"],
+    "projecting jawline": ["East Africa", "Melanesia"],
+    "low nasal bridge": ["Southeast Asia", "Tibet", "Borneo"],
+    "narrow nasal bridge": ["Northern India", "Arabian Peninsula", "Iran Plateau"],
+    "high cheekbones": ["Central Asia", "Andes", "Himalayas"]
+}
+
+# Save to file if missing
+TRAIT_FILE = "traits_to_regions.json"
+if not os.path.exists(TRAIT_FILE):
+    with open(TRAIT_FILE, "w") as f:
+        json.dump(TRAIT_REGION_DATA, f, indent=2)
+
 # Load trait-to-region mapping
-with open("traits_to_regions.json") as f:
+with open(TRAIT_FILE) as f:
     traits_to_regions = json.load(f)
 
 def extract_regions_from_text(text):
@@ -88,7 +108,7 @@ async def analyze_face(image: UploadFile = File(...)):
         regions = extract_regions_from_text(result)
         return {
             "result": result,
-            "regions": regions  # Can be used to display on map
+            "regions": regions
         }
     except Exception as e:
         return {"error": str(e)}
