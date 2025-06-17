@@ -23,7 +23,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Embed the traits-to-regions mapping directly
+# Embedded trait-to-region mapping
 traits_to_regions = {
     "broad nasal base": ["Congo Basin", "Eastern India", "Philippines"],
     "wavy black hair": ["South Asia", "Southern Italy", "Vietnam"],
@@ -91,12 +91,19 @@ async def analyze_face(image: UploadFile = File(...)):
             max_tokens=700,
             temperature=0.7
         )
-        result = response.choices[0].message.content
-        regions = extract_regions_from_text(result)
+        raw_text = response.choices[0].message.content
+
+        # Format traits as bullet points
+        lines = [line.strip() for line in raw_text.split('\n') if line.strip()]
+        bullet_points = "\n".join(f"• {line}" for line in lines)
+
+        regions = extract_regions_from_text(raw_text)
+
         return {
-            "result": result,
-            "regions": regions  # front-end can map these
+            "result": bullet_points,
+            "regions": regions
         }
+
     except Exception as e:
         return {"error": str(e)}
 
