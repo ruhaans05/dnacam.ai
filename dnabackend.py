@@ -27,49 +27,79 @@ async def analyze_face(image: UploadFile = File(...)):
     mime_type = image.content_type or "image/jpeg"
     image_data = f"data:{mime_type};base64,{base64_image}"
 
-    messages = [
-    {
-        "role": "system",
-        "content": (
-            "You are a morphological feature analysis model. You only analyze anatomical traits and describe patterns "
-            "observed in the image using population-level morphological data. You avoid cultural, political, or identity-based assumptions."
+    extract_traits_messages = [
+        {
+            "role": "system",
+            "content": (
+                "You are a morphological feature analysis model. Describe only anatomical features based on the image. "
+                "Avoid identity, cultural, or political commentary."
+            )
+        },
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "text",
+                    "text": (
+                        "List the individual's visible traits using anatomical terms. "
+                        "Include skin tone, eye shape, craniofacial proportions, nasal structure, and hair texture. "
+                        "Use a neutral scientific tone."
+                    )
+                },
+                {
+                    "type": "image_url",
+                    "image_url": {
+                        "url": image_data,
+                        "detail": "high"
+                    }
+                }
+            ]
+        }
+    ]
+
+    try:
+        # Step 1: Extract traits from image
+        traits_response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=extract_traits_messages,
+            max_tokens=700,
+            temperature=0.5
         )
-    },
-    {
-        "role": "user",
-        "content": [
+        traits_summary = traits_response.choices[0].message.content
+
+        # Step 2: Feed those traits into a second GPT query to get the most likely region
+        region_prompt = [
             {
-                "type": "text",
-                "text": (
-                    "Use a scientific and anatomical approach to describe the visible facial features in the image. "
-                    "Consider traits such as craniofacial proportions, skin pigmentation, eye morphology, and hair texture. "
-                    "Describe how these traits may be similar to those observed in specific regional morphological clusters "
-                    "based on population-level trait datasets, without making assumptions about identity, race, or origin. "
-                    "Do not use nationality or cultural terms. Frame your reasoning as pattern-based classification, not sociological interpretation."
+                "role": "system",
+                "content": (
+                    "You are an anatomical data analyst. Given a list of human physical traits, identify the region(s) "
+                    "where these traits are most statistically concentrated. Base your answer on trait frequency patterns, "
+                    "not cultural or identity assumptions."
                 )
             },
             {
-                "type": "image_url",
-                "image_url": {
-                    "url": image_data,
-                    "detail": "high"
-                }
+                "role": "user",
+                "content": (
+                    f"Here is a list of physical traits observed in a human face:\n\n{traits_summary}\n\n"
+                    "Based on population trait clustering data, identify the single region of the world where this combination "
+                    "of traits is most statistically concentrated. Do not mention ethnicity or culture."
+                )
             }
         ]
-    }
-]
 
-
-
-    try:
-        response = client.chat.completions.create(
+        region_response = client.chat.completions.create(
             model="gpt-4o",
-            messages=messages,
-            max_tokens=700,
-            temperature=0.7
+            messages=region_prompt,
+            max_tokens=300,
+            temperature=0.5
         )
-        result = response.choices[0].message.content
-        return {"result": result}
+        region_result = region_response.choices[0].message.content
+
+        return {
+            "traits": traits_summary,
+            "region": region_result
+        }
+
     except Exception as e:
         return {"error": str(e)}
 
