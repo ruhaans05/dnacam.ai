@@ -1,16 +1,23 @@
-
 <!DOCTYPE html>
 <html>
 <head>
   <title>Regional Trait Map</title>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+
   <style>
     #map {
       height: 100vh;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    body, html {
+      margin: 0;
+      padding: 0;
     }
   </style>
 </head>
@@ -49,6 +56,40 @@
       "Himalayas": [28, 85]
     };
 
+    // Reverse map: region => most associated trait
+    const regionToTrait = {
+      "Congo Basin": "broad nasal base",
+      "Eastern India": "broad nasal base",
+      "Philippines": "broad nasal base",
+      "South Asia": "wavy black hair",
+      "Southern Italy": "wavy black hair",
+      "Vietnam": "wavy black hair",
+      "Central India": "medium brown skin tone",
+      "Northern Brazil": "medium brown skin tone",
+      "Sri Lanka": "medium brown skin tone",
+      "Mongolia": "prominent cheekbones",
+      "Andean Highlands": "prominent cheekbones",
+      "Yunnan": "prominent cheekbones",
+      "Northern Europe": "deep-set eyes",
+      "Caucasus": "deep-set eyes",
+      "Northern China": "straight eyebrows",
+      "Korea": "straight eyebrows",
+      "Kazakhstan": "straight eyebrows",
+      "East Africa": "projecting jawline",
+      "Melanesia": "projecting jawline",
+      "Southeast Asia": "low nasal bridge",
+      "Tibet": "low nasal bridge",
+      "Borneo": "low nasal bridge",
+      "Northern India": "narrow nasal bridge",
+      "Arabian Peninsula": "narrow nasal bridge",
+      "Iran Plateau": "narrow nasal bridge",
+      "Central Asia": "high cheekbones",
+      "Andes": "high cheekbones",
+      "Himalayas": "high cheekbones"
+    };
+
+    const matchedRegions = Object.keys(regionToCoordinates); // Show all for now
+
     const map = L.map('map').setView([20, 0], 2);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -56,18 +97,18 @@
       attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
-    // Highlighted traits from last analysis (replace with actual values later)
-    const matchedRegions = ["Eastern India", "Congo Basin", "South Asia"];
-
     matchedRegions.forEach(region => {
       const coords = regionToCoordinates[region];
-      if (coords) {
+      const trait = regionToTrait[region];
+      if (coords && trait) {
         L.circle(coords, {
           color: 'red',
           fillColor: '#f03',
           fillOpacity: 0.5,
           radius: 500000
-        }).addTo(map).bindPopup(region);
+        })
+        .addTo(map)
+        .bindPopup(`<b>${region}</b><br><i>Most common trait:</i><br>${trait}`);
       }
     });
   </script>
