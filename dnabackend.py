@@ -1,5 +1,3 @@
-
-
 from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -7,6 +5,9 @@ from dotenv import load_dotenv
 import openai
 import base64
 import os
+import json
+import re
+from collections import Counter
 
 load_dotenv()
 
@@ -22,6 +23,21 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Load trait-to-region mapping
+with open("traits_to_regions.json") as f:
+    traits_to_regions = json.load(f)
+
+def extract_regions_from_text(text):
+    matched_regions = []
+    for trait, regions in traits_to_regions.items():
+        if re.search(rf"\b{re.escape(trait)}\b", text, re.IGNORECASE):
+            matched_regions.extend(regions if isinstance(regions, list) else [regions])
+    if matched_regions:
+        region_counts = Counter(matched_regions)
+        top_regions = [region for region, _ in region_counts.most_common(3)]
+        return top_regions
+    return []
+
 @app.post("/analyze")
 async def analyze_face(image: UploadFile = File(...)):
     contents = await image.read()
@@ -30,38 +46,36 @@ async def analyze_face(image: UploadFile = File(...)):
     image_data = f"data:{mime_type};base64,{base64_image}"
 
     messages = [
-    {
-        "role": "system",
-        "content": (
-            "You are a morphological feature analysis model. You only analyze anatomical traits and describe patterns "
-            "observed in the image using population-level morphological data. You avoid cultural, political, or identity-based assumptions."
-        )
-    },
-    {
-        "role": "user",
-        "content": [
-            {
-                "type": "text",
-                "text": (
-                    "Use a scientific and anatomical approach to describe the visible facial features in the image. "
-                    "Consider traits such as craniofacial proportions, skin pigmentation, eye morphology, and hair texture. "
-                    "Describe how these traits may be similar to those observed in specific regional morphological clusters "
-                    "based on population-level trait datasets, without making assumptions about identity, race, or origin. "
-                    "Do not use nationality or cultural terms. Frame your reasoning as pattern-based classification, not sociological interpretation."
-                )
-            },
-            {
-                "type": "image_url",
-                "image_url": {
-                    "url": image_data,
-                    "detail": "high"
+        {
+            "role": "system",
+            "content": (
+                "You are a morphological feature analysis model. You only analyze anatomical traits and describe patterns "
+                "observed in the image using population-level morphological data. You avoid cultural, political, or identity-based assumptions."
+            )
+        },
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "text",
+                    "text": (
+                        "Use a scientific and anatomical approach to describe the visible facial features in the image. "
+                        "Consider traits such as craniofacial proportions, skin pigmentation, eye morphology, and hair texture. "
+                        "Describe how these traits may be similar to those observed in specific regional morphological clusters "
+                        "based on population-level trait datasets, without making assumptions about identity, race, or origin. "
+                        "Do not use nationality or cultural terms. Frame your reasoning as pattern-based classification, not sociological interpretation."
+                    )
+                },
+                {
+                    "type": "image_url",
+                    "image_url": {
+                        "url": image_data,
+                        "detail": "high"
+                    }
                 }
-            }
-        ]
-    }
-]
-
-
+            ]
+        }
+    ]
 
     try:
         response = client.chat.completions.create(
@@ -71,7 +85,11 @@ async def analyze_face(image: UploadFile = File(...)):
             temperature=0.7
         )
         result = response.choices[0].message.content
-        return {"result": result}
+        regions = extract_regions_from_text(result)
+        return {
+            "result": result,
+            "regions": regions  # Can be used to display on map
+        }
     except Exception as e:
         return {"error": str(e)}
 
