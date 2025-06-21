@@ -164,18 +164,33 @@ async def analyze_face(image: UploadFile = File(...)):
             max_tokens=700,
             temperature=0.7
         )
+        
         raw_text = response.choices[0].message.content
 
+        # Extract bullet points with spacing
         lines = [line.strip() for line in raw_text.split('\n') if line.strip()]
         bullet_points = "\n\n".join(f"• {line}" for line in lines)
 
+        # Determine dominant region from traits
+        matched_regions = []
+        for trait, regions in traits_to_regions.items():
+            if re.search(rf"\b{re.escape(trait)}\b", raw_text, re.IGNORECASE):
+                matched_regions.extend(regions)
 
-        regions = extract_regions_from_text(raw_text)
+        if matched_regions:
+            region_counts = Counter(matched_regions)
+            top_region, _ = region_counts.most_common(1)[0]
+            region_output = f"\n\n🌍 **Most Associated Region:** *{top_region}*\nBased on morphological trait clustering."
+        else:
+            region_output = "\n\n🌍 **Most Associated Region:** *Not identifiable from traits.*"
+
+        full_result = f"{bullet_points}{region_output}"
 
         return {
-            "result": bullet_points,
-            "regions": regions
+            "result": full_result,
+            "regions": [top_region] if matched_regions else []
         }
+
 
     except Exception as e:
         return {"error": str(e)}
