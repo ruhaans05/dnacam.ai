@@ -167,7 +167,8 @@ async def analyze_face(image: UploadFile = File(...)):
         raw_text = response.choices[0].message.content
 
         lines = [line.strip() for line in raw_text.split('\n') if line.strip()]
-        bullet_points = "\n".join(f"• {line}" for line in lines)
+        bullet_points = "\n\n".join(f"• {line}" for line in lines)
+
 
         regions = extract_regions_from_text(raw_text)
 
