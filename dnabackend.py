@@ -183,7 +183,7 @@ async def analyze_face(image: UploadFile = File(...)):
             region_output = f"\n\n🌍 **Most Associated Region:** *{top_region}*\nBased on morphological trait clustering."
         else:
             top_region = "South Asia"
-            region_output = f"\n\n🌍 **Most Associated Region:** *{top_region}*\n(Default fallback.)"
+            region_output = f"\n\n🌍 **Most Associated Region:** *{top_region}*\n"
 
         full_result = f"{bullet_points}{region_output}"
 
