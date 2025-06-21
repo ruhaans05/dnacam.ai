@@ -5,9 +5,8 @@ from dotenv import load_dotenv
 import openai
 import base64
 import os
-import json
 import re
-from collections import Counter
+from collections import defaultdict, Counter
 
 load_dotenv()
 
@@ -23,18 +22,92 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Embedded trait-to-region mapping
+# Expanded trait-to-region mapping (mirrors map.html)
 traits_to_regions = {
-    "broad nasal base": ["Congo Basin", "Eastern India", "Philippines"],
-    "wavy black hair": ["South Asia", "Southern Italy", "Vietnam"],
-    "medium brown skin tone": ["Central India", "Northern Brazil", "Sri Lanka"],
-    "prominent cheekbones": ["Mongolia", "Andean Highlands", "Yunnan"],
-    "deep-set eyes": ["Northern Europe", "Caucasus"],
+    "broad nasal base": ["Congo Basin", "Eastern India", "Philippines", "West Africa"],
+    "deep melanin pigmentation": ["Congo Basin"],
+    "medium brown skin": ["Eastern India", "Central India"],
+    "thick wavy hair": ["Eastern India"],
+    "flat nasal bridge": ["Philippines", "Vietnam"],
+    "almond eyes": ["Philippines", "Southeast Asia", "Central Asia"],
+    "olive skin": ["South Asia", "Pakistan"],
+    "prominent nose bridge": ["South Asia"],
+    "Mediterranean complexion": ["Southern Italy"],
+    "rounded jawline": ["Central India", "Korea"],
+    "Amazonian features": ["Northern Brazil"],
+    "small orbital opening": ["Sri Lanka"],
+    "epicanthic fold": ["Mongolia", "Korea", "Japan", "Siberia"],
+    "round facial shape": ["Mongolia"],
+    "bronzed skin": ["Andean Highlands", "Andes"],
+    "narrow eyes": ["Andean Highlands"],
+    "intermediate skin tone": ["Yunnan"],
+    "high forehead": ["Northern Europe"],
+    "light pigmentation": ["Northern Europe", "Scandinavia", "UK"],
+    "hooked nose": ["Caucasus"],
     "straight eyebrows": ["Northern China", "Korea", "Kazakhstan"],
+    "flat face": ["Northern China"],
+    "medium pigmentation": ["Northern China", "France"],
+    "broad cheekbones": ["Kazakhstan", "Northern Canada", "Siberia"],
     "projecting jawline": ["East Africa", "Melanesia"],
+    "tight curls": ["Melanesia"],
     "low nasal bridge": ["Southeast Asia", "Tibet", "Borneo"],
-    "narrow nasal bridge": ["Northern India", "Arabian Peninsula", "Iran Plateau"],
-    "high cheekbones": ["Central Asia", "Andes", "Himalayas"]
+    "wider facial angle": ["Tibet"],
+    "broad nose": ["Borneo", "West Africa"],
+    "narrow nasal bridge": ["Northern India", "Arabian Peninsula", "Iran Plateau", "Spain"],
+    "longer face": ["Northern India"],
+    "deep eyes": ["Arabian Peninsula"],
+    "prominent chin": ["Iran Plateau"],
+    "high cheekbones": ["Central Asia", "East Africa", "Andes", "Himalayas"],
+    "broad forehead": ["Himalayas", "Ukraine"],
+    "light eyes": ["Scandinavia"],
+    "tall stature": ["Scandinavia"],
+    "narrow face": ["Scandinavia"],
+    "high melanin": ["West Africa"],
+    "shorter forehead": ["West Africa"],
+    "diverse blend": ["East Coast USA", "West Coast USA"],
+    "mixed features": ["East Coast USA"],
+    "multiethnic appearance": ["West Coast USA"],
+    "European-African mix": ["Southern USA"],
+    "wide facial width": ["Southern USA"],
+    "Inuit cranial traits": ["Northern Canada"],
+    "cold-adapted noses": ["Northern Canada"],
+    "Mesoamerican features": ["Mexico"],
+    "straight black hair": ["Mexico"],
+    "African-Caribbean mix": ["Caribbean"],
+    "medium-wide nose": ["Caribbean"],
+    "Khoisan features": ["South Africa"],
+    "Bantu cranial shape": ["South Africa"],
+    "Berber-Arab features": ["Maghreb"],
+    "medium skin tone": ["Maghreb", "France"],
+    "Anatolian skull": ["Turkey"],
+    "mixed traits": ["Turkey"],
+    "Slavic-Dinaric nose": ["Balkans"],
+    "robust jawline": ["Balkans"],
+    "Anglo-Celtic features": ["Australia"],
+    "oval face": ["Australia", "France"],
+    "Māori brow ridge": ["New Zealand"],
+    "strong jaw": ["New Zealand"],
+    "short limbs": ["Siberia"],
+    "brown skin": ["Indonesia"],
+    "broad lips": ["Indonesia"],
+    "straight hair": ["Japan"],
+    "oval jaw": ["Japan"],
+    "Anglo-Saxon features": ["UK"],
+    "thin lips": ["UK"],
+    "Gallic traits": ["France"],
+    "Teutonic jaw": ["Germany"],
+    "deep eye sockets": ["Germany"],
+    "Mediterranean pigment": ["Spain"],
+    "Slavic cranial vault": ["Ukraine"],
+    "Indo-Iranian features": ["Pakistan"],
+    "Bengali curve": ["Bangladesh"],
+    "soft cheekbones": ["Bangladesh"],
+    "Bamar structure": ["Myanmar"],
+    "medium-dark skin": ["Myanmar"],
+    "Thai eye ridge": ["Thailand"],
+    "smaller jaw": ["Thailand"],
+    "Malay jaw curve": ["Malaysia"],
+    "medium nasal bridge": ["Malaysia"]
 }
 
 def extract_regions_from_text(text):
@@ -93,7 +166,6 @@ async def analyze_face(image: UploadFile = File(...)):
         )
         raw_text = response.choices[0].message.content
 
-        # Format traits as bullet points
         lines = [line.strip() for line in raw_text.split('\n') if line.strip()]
         bullet_points = "\n".join(f"• {line}" for line in lines)
 
